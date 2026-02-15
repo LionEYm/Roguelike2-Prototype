@@ -68,6 +68,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Env_Tiles_Texture_10
       objectReference: {fileID: 0}
+    - target: {fileID: 335875488701338970, guid: 6c19c210a3c86924bafa9723541dd972, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1144640355119763424, guid: 6c19c210a3c86924bafa9723541dd972, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5
@@ -110,7 +114,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2281557589326197903, guid: 6c19c210a3c86924bafa9723541dd972, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4056986542100611141, guid: 6c19c210a3c86924bafa9723541dd972, type: 3}
       propertyPath: m_Mesh

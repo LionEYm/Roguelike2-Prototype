@@ -22,29 +22,37 @@ public class DungeonGenerator : MonoBehaviour
     public enum CellType
     {
         Floor,
-        Wall
+        Wall,
+        Object,
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        if(Size<=5)
+        if(Size<=7)
         {
             Debug.LogError("Dungeon generator with size too small");
+            return;
         }
         if(WallTile==null || FloorTile==null)
         {
             Debug.LogError("Dungeon generator with null floor/wall tile");
+            return;
 
         }
 
         if(DungeonModifiers==null || DungeonModifiers.Count<=0)
         {
             Debug.LogError("Dungeon generator with null or empty modifiers");
+            return;
         }
+
+        if (Size % 2 == 0)
+            Size--;
 
         InitializeSeed();
         GenerateDungeon();
+        PrintDungeonToConsole();
         ModifyDungeon();
         InstantiateTiles();
         //PrintDungeonToConsole();
@@ -133,20 +141,41 @@ public class DungeonGenerator : MonoBehaviour
         //ORDER OF THE LIST MATTERS!!!!
         foreach (var modifier in DungeonModifiers)
         {
-            for (int i = 0; i < modifier.GetAmount(Size); i++)
+            var amount = modifier.GetAmount(Size);
+            modifier.Initialize(_dungeon);
+            for (int i = 0; i < amount; i++)
             {
                 modifier.Action(ref _dungeon);
             }
+            PrintDungeonToConsole();
         }
     }
 
     private void InstantiateTiles()
     {
+        GameObject tilePrefab;
         for (int x = 0; x < Size; x++)
         {
             for (int y = 0; y < Size; y++)
             {
-                var tilePrefab = _dungeon[x, y] == CellType.Floor ? FloorTile : WallTile;
+                switch(_dungeon[x, y])
+                {
+                    case (CellType.Floor):
+                        {
+                            tilePrefab = FloorTile;
+                        }
+                        break;
+                    case (CellType.Wall):
+                        {
+                            tilePrefab = WallTile;
+                        }
+                        break;
+                    default:
+                        {
+                            continue;
+                        }break;
+                        
+                }
                 var go = Instantiate(tilePrefab, new Vector3(x * _cellSizeOffset, 0, y * _cellSizeOffset), Quaternion.identity, this.transform);
                 //weird rotate cus prefab is off
                 if(_dungeon[x, y] == CellType.Floor)
@@ -180,11 +209,11 @@ public class DungeonGenerator : MonoBehaviour
 
         Debug.Log(builder.ToString());
     }
-
     private void Update()
     {
-        if(Input.GetMouseButton(0))
+        if(Input.GetMouseButton(0) || Time.time>3)
         {
+            Size += 2;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }

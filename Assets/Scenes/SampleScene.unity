@@ -461,7 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81666eaf3275bd54faea78eb0ff311dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  Seed: 0
+  Seed: -356170132
   WallTile: {fileID: 3206386720690221896, guid: 3f0a21e0b9f4c49499478bbff7776a55, type: 3}
   FloorTile: {fileID: 335875488701338970, guid: 6c19c210a3c86924bafa9723541dd972, type: 3}
   Size: 20
