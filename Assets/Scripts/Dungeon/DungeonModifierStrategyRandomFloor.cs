@@ -2,6 +2,9 @@ using UnityEngine;
 using static DungeonGenerator;
 
 [CreateAssetMenu(fileName = "Dungeon Modifier Strategy Random Floor", menuName = "Dungeon/Modifier Strategy/Random Floor")]
+///
+/// This modifier randomly sets walls as floors
+///
 public class DungeonModifierStrategyRandomFloor : DungeonModifierStrategyBase
 {
     public override void Action(ref CellType[,] dungeon)
@@ -11,7 +14,7 @@ public class DungeonModifierStrategyRandomFloor : DungeonModifierStrategyBase
         {
             x = Random.Range(1, dungeon.GetLength(0) - 1);
             y = Random.Range(1, dungeon.GetLength(1) - 1);
-        } while (dungeon[x, y] == CellType.Floor);
+        } while (dungeon[x, y] != CellType.Wall);
 
         dungeon[x, y] = CellType.Floor;
     }

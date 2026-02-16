@@ -37,6 +37,13 @@ namespace Synty.AnimationBaseLocomotion.Samples.InputSystem
 
         public Action onWalkToggled;
 
+        public Action onAttackStart;
+        public Action onAttackPerformed;
+
+        public Action<bool> onBlockPerformed;
+
+
+
         /// <inheritdoc cref="OnEnable" />
         private void OnEnable()
         {
@@ -164,6 +171,33 @@ namespace Synty.AnimationBaseLocomotion.Samples.InputSystem
 
             onLockOnToggled?.Invoke();
             onSprintDeactivated?.Invoke();
+        }
+
+
+        /// <summary>
+        ///     Defines the action to perform when the OnLockOn callback is called.
+        /// </summary>
+        /// <param name="context">The context of the callback.</param>
+        public void OnAttack(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                onAttackStart?.Invoke();
+            }
+
+            else if (context.canceled)
+                onAttackPerformed?.Invoke();
+        }
+
+        public void OnBlock(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+            {
+                onBlockPerformed?.Invoke(true);
+            }
+            if(context.canceled)
+                onBlockPerformed?.Invoke(false);
+
         }
     }
 }

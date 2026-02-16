@@ -52,20 +52,24 @@ public class DungeonGenerator : MonoBehaviour
 
         InitializeSeed();
         GenerateDungeon();
-        PrintDungeonToConsole();
         ModifyDungeon();
         InstantiateTiles();
         //PrintDungeonToConsole();
     }
 
+    /// <summary>
+    /// Sets the seed for this dungeon.
+    /// </summary>
     private void InitializeSeed()
     {
-
         Seed = Seed == 0 ? UnityEngine.Random.Range(int.MinValue, int.MaxValue) : Seed;
         Random.InitState(Seed);
         Debug.Log($"<color=red>{Seed}</color=red>");
     }
 
+    /// <summary>
+    /// Generates the base for the dungeon using the recursive backtracking algorithm
+    /// </summary>
     private void GenerateDungeon()
     {
         //initialze dungeon as walls
@@ -111,7 +115,13 @@ public class DungeonGenerator : MonoBehaviour
         }
         while (_trail.Count!=0);
     }
-
+    /// <summary>
+    /// Returns all floor neighbors of the current cell.
+    /// </summary>
+    /// <param name="orgX"></param>
+    /// <param name="orgY"></param>
+    /// <param name="targetCellType"></param>
+    /// <returns></returns>
     private List<Vector2Int> GetNeighbors(int orgX, int orgY, CellType targetCellType)
     {
         var alligbleNeighbors = new List<Vector2Int>();
@@ -135,7 +145,9 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Applies all of the modifers to the dungeon.
+    /// </summary>
     private void ModifyDungeon()
     {
         //ORDER OF THE LIST MATTERS!!!!
@@ -147,7 +159,6 @@ public class DungeonGenerator : MonoBehaviour
             {
                 modifier.Action(ref _dungeon);
             }
-            PrintDungeonToConsole();
         }
     }
 
@@ -211,9 +222,9 @@ public class DungeonGenerator : MonoBehaviour
     }
     private void Update()
     {
-        if(Input.GetMouseButton(0) || Time.time>3)
+        if(Input.GetKeyDown(KeyCode.R))// || Time.time>3)
         {
-            Size += 2;
+          //  Size += 2;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }

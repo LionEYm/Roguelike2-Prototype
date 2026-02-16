@@ -1,15 +1,18 @@
 using System.Collections.Generic;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using static DungeonGenerator;
 
 [CreateAssetMenu(fileName = "Dungeon Modifier Strategy Hidden", menuName = "Dungeon/Modifier Strategy/Hidden")]
 
+///
+/// This modifier adds random hidden rooms throughout the dungeon (while making sure they dont block areas)
+///
 public class DungeonModifierStrategyHidden : DungeonModifierStrategyBase
 {
     [SerializeField] private GameObject HiddenRoomPrefab;
     [SerializeField] private int CellSizeOffset = 5;
     private int floorAmount;
+    private GameObject _parent;
 
     private void OnValidate()
     {
@@ -23,14 +26,17 @@ public class DungeonModifierStrategyHidden : DungeonModifierStrategyBase
     {
         CalculateFloorAmount(dungeon);
         _badCanidates = new bool[dungeon.GetLength(0), dungeon.GetLength(1)];
+        _parent = new GameObject();
+        _parent.name = "Hidden Rooms";
     }
 
     public override void Action(ref CellType[,] dungeon)
     {
         var cords = GetCords(dungeon, floorAmount);
+        if (cords == (1, 1))
+            return;
         int x = cords.x;
         int y = cords.y;
-        Debug.Log($" Set {x},{y} as hidden room");
 
         // Ensure this cell is floor (hidden room occupies a floor tile)
         dungeon[x, y] = CellType.Object;
@@ -41,6 +47,7 @@ public class DungeonModifierStrategyHidden : DungeonModifierStrategyBase
             new Vector3(x * CellSizeOffset, 0f, y * CellSizeOffset),
             Quaternion.identity
         );
+        go.transform.parent = _parent.transform;
 
         HiddenRoom hiddenRoom = go.GetComponent<HiddenRoom>();
         if (hiddenRoom == null)
@@ -48,11 +55,27 @@ public class DungeonModifierStrategyHidden : DungeonModifierStrategyBase
 
         // ---- Determine wall types based on dungeon neighbors ----
 
-        SetWallFromNeighbor(hiddenRoom, dungeon, x, y+1, HiddenRoom.Direction.Up);
-        SetWallFromNeighbor(hiddenRoom, dungeon, x, y-1, HiddenRoom.Direction.Down);
-        SetWallFromNeighbor(hiddenRoom, dungeon, x-1, y, HiddenRoom.Direction.Left);
-        SetWallFromNeighbor(hiddenRoom, dungeon, x+1, y,HiddenRoom.Direction.Right);
+        SetWallFromNeighbor(dungeon, x, y + 1, HiddenRoom.Direction.Up);
+        SetWallFromNeighbor(dungeon, x, y - 1, HiddenRoom.Direction.Down);
+        SetWallFromNeighbor(dungeon, x - 1, y, HiddenRoom.Direction.Left);
+        SetWallFromNeighbor(dungeon, x + 1, y, HiddenRoom.Direction.Right);
         hiddenRoom.Initialize();
+
+
+        void SetWallFromNeighbor(CellType[,] dungeon, int x, int y, HiddenRoom.Direction dir)
+        {
+
+            bool destroyable = false;
+
+            if (x >= 0 && y >= 0 &&
+                x < dungeon.GetLength(0) &&
+                y < dungeon.GetLength(1))
+            {
+                destroyable = dungeon[x, y] == CellType.Floor;
+            }
+
+            hiddenRoom.SetDestroyable(dir, destroyable);
+        }
     }
 
     private int[,] _visitedStamp;
@@ -74,7 +97,6 @@ public class DungeonModifierStrategyHidden : DungeonModifierStrategyBase
 
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            Debug.Log(attempt);
             // 1) Pick a candidate floor tile to block
             int x, y,c=0;
             do
@@ -144,7 +166,7 @@ public class DungeonModifierStrategyHidden : DungeonModifierStrategyBase
         if (_stamp == int.MaxValue)
         {
             System.Array.Clear(_visitedStamp, 0, _visitedStamp.Length);
-            _stamp = 1;
+            _stamp = 0;
         }
 
         _stack.Clear();
@@ -180,27 +202,6 @@ public class DungeonModifierStrategyHidden : DungeonModifierStrategyBase
             _visitedStamp[nx, ny] = _stamp;
             _stack.Push((nx, ny));
         }
-    }
-
-    private void SetWallFromNeighbor(
-        HiddenRoom room,
-        CellType[,] dungeon,
-        int x,
-        int y,
-
-        HiddenRoom.Direction dir)
-    {
-
-        bool destroyable = false;
-
-        if (x >= 0 && y >= 0 &&
-            x < dungeon.GetLength(0) &&
-            y < dungeon.GetLength(1))
-        {
-            destroyable = dungeon[x, y] == CellType.Floor;
-        }
-
-        room.SetDestroyable(dir, destroyable);
     }
 
     public override int GetAmount(int dungeonSize)
